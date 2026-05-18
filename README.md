@@ -22,8 +22,7 @@
 
 **Backend:**
 - Node.js + Express
-- nodemailer — отправка писем через SMTP
-- Google Gemini API (`gemini-2.0-flash`) — AI-ассистент
+- Resend — отправка писем
 - dotenv — конфигурация окружения
 
 ---
