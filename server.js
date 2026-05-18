@@ -1,5 +1,5 @@
 import express from 'express';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -17,7 +17,15 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 function validateContact(body) {
   const { name, phone, email } = body;
@@ -42,18 +50,8 @@ app.post('/api/contact', async (req, res) => {
 
   try {
     await Promise.all([
-      resend.emails.send({
-        from: 'Portfolio <onboarding@resend.dev>',
-        to: ownerEmail,
-        subject: `[Portfolio] Сообщение от ${name}`,
-        html: ownerHtml,
-      }),
-      resend.emails.send({
-        from: 'Марианна Зуева <onboarding@resend.dev>',
-        to: email,
-        subject: 'Ваше сообщение получено',
-        html: userHtml,
-      }),
+      transporter.sendMail({ from: `"Portfolio" <${process.env.SMTP_USER}>`, to: ownerEmail, subject: `[Portfolio] Сообщение от ${name}`, html: ownerHtml }),
+      transporter.sendMail({ from: `"Марианна Зуева" <${process.env.SMTP_USER}>`, to: email, subject: 'Ваше сообщение получено', html: userHtml }),
     ]);
     return res.json({ success: true, message: 'Сообщение отправлено' });
   } catch (err) {
