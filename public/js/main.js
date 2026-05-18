@@ -153,7 +153,6 @@ form.addEventListener('submit', async (e) => {
 
   setLoading(true);
   formStatus.className = 'form-status';
-  formStatus.style.display = 'none';
 
   try {
     const res = await fetch('/api/contact', {
@@ -165,7 +164,7 @@ form.addEventListener('submit', async (e) => {
     const result = await res.json();
 
     if (res.ok && result.success) {
-      formStatus.textContent = '✓ Сообщение отправлено! Копия отправлена на ваш email.';
+      formStatus.textContent = '✓ Сообщение отправлено! Свяжусь с вами в ближайшее время.';
       formStatus.className = 'form-status success';
       form.reset();
     } else {
