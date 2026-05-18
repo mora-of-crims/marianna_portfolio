@@ -1,5 +1,5 @@
 import express from 'express';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -17,15 +17,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 function validateContact(body) {
   const { name, phone, email } = body;
@@ -46,13 +38,14 @@ app.post('/api/contact', async (req, res) => {
   const now = new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Almaty' });
 
   const ownerHtml = `<div style="font-family:Arial,sans-serif;background:#080C14;color:#F0F4FF;padding:32px;border-radius:12px"><h2 style="color:#E63946">📨 Новое сообщение с сайта</h2><p><b>Имя:</b> ${name}</p><p><b>Телефон:</b> ${phone}</p><p><b>Email:</b> ${email}</p><p><b>Сообщение:</b> ${message || 'не указано'}</p><p style="color:#4A5878">${now}</p></div>`;
-  const userHtml = `<div style="font-family:Arial,sans-serif;background:#080C14;color:#F0F4FF;padding:32px;border-radius:12px"><h2 style="color:#2563EB">Спасибо, ${name}!</h2><p style="color:#8898B4">Ваше сообщение получено. Отвечу в ближайшее время.</p><p style="color:#4A5878">— Марианна Зуева · moraofcrims@gmail.com · @TEXHOSTAR</p></div>`;
 
   try {
-    await Promise.all([
-      transporter.sendMail({ from: `"Portfolio" <${process.env.SMTP_USER}>`, to: ownerEmail, subject: `[Portfolio] Сообщение от ${name}`, html: ownerHtml }),
-      transporter.sendMail({ from: `"Марианна Зуева" <${process.env.SMTP_USER}>`, to: email, subject: 'Ваше сообщение получено', html: userHtml }),
-    ]);
+    await resend.emails.send({
+      from: 'Portfolio <onboarding@resend.dev>',
+      to: ownerEmail,
+      subject: `[Portfolio] Сообщение от ${name}`,
+      html: ownerHtml,
+    });
     return res.json({ success: true, message: 'Сообщение отправлено' });
   } catch (err) {
     console.error('Email error:', err);
