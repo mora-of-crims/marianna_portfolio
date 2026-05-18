@@ -1,6 +1,5 @@
 import express from 'express';
 import nodemailer from 'nodemailer';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -24,19 +23,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const ABOUT_ME = `
-Ты AI-ассистент Марианны Зуевой — разработчика.
-Имя: Зуева Марианна Сергеевна
-Контакты: email moraofcrims@gmail.com, telegram @TEXHOSTAR, телефон +7 777 211 8701
-Стек: Python, Node.js, JavaScript, HTML/CSS/SCSS, SQL/MySQL, n8n, REST API, Webhooks.
-AI и боты: чат-боты, голосовые боты, LLM/AI-агенты, OpenAI API, Claude API.
-Коммуникации: IP-телефония, омниканальность, SMS, мессенджеры.
-Кейсы: AI-чат-бот для клиентского сервиса, автоматизация в n8n, голосовой бот, REST API + Frontend.
-Подход: сначала бизнес-задача, потом код. AI как ассистент. Всегда обработка ошибок.
-Отвечай кратко (2-4 предложения), по делу, на русском языке. Будь дружелюбным.
-`;
 
 function validateContact(body) {
   const { name, phone, email } = body;
